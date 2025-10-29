@@ -20,6 +20,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+//for new krajen motors, not sure/tested yet :) 
+/*
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+*/
+
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -34,6 +39,10 @@ public class Robot extends TimedRobot {
  private final WPI_VictorSPX rightFollower= new WPI_VictorSPX(14);
  private final WPI_TalonSRX rightAux     = new WPI_TalonSRX(22);
  private final WPI_TalonSRX leftAux     = new WPI_TalonSRX(21);
+/*for new krajen motors, not sure/tested yet :)
+private final WPI_TalonFX; Aux3= new WPI_TalonFX;(14); Need to do can ID first
+*/
+
 
  private DifferentialDrive drive;
  private final XboxController driver = new XboxController(0);
