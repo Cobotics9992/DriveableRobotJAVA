@@ -1,15 +1,21 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software released under the WPILib BSD licence.
 
+
 package frc.robot;
 
+
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Angle;
+/* 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
+*/
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -20,28 +26,31 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-//for new krajen motors, not sure/tested yet :) 
-/*
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-*/
-
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.hardware.TalonFX;
+// import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+// import frc.robot.subsystems.Pigeon2Subsystem;
+// import frc.robot.subsystems.Pigeon1Subsystem;
 
 import edu.wpi.first.wpilibj.Timer;
 
 
 public class Robot extends TimedRobot {
 
-
+// private final WPI_VictorSPX leftMaster   = new WPI_VictorSPX(11);
  // CAN IDs
  private final WPI_VictorSPX leftMaster   = new WPI_VictorSPX(11);
  private final WPI_VictorSPX rightMaster  = new WPI_VictorSPX(12);
  private final WPI_VictorSPX leftFollower = new WPI_VictorSPX(13);
  private final WPI_VictorSPX rightFollower= new WPI_VictorSPX(14);
- private final WPI_TalonSRX rightAux     = new WPI_TalonSRX(22);
- private final WPI_TalonSRX leftAux     = new WPI_TalonSRX(21);
-/*for new krajen motors, not sure/tested yet :)
-private final WPI_TalonFX; Aux3= new WPI_TalonFX;(14); Need to do can ID first
-*/
+ private final WPI_TalonSRX rightAux      = new WPI_TalonSRX(22);
+ private final TalonFX leftAux            = new   TalonFX(7);
+ //private final WPI_PigeonIMU pidgey     = new   WPI_PigeonIMU(7);
+ private final Pigeon2 pidgey     = new   Pigeon2(6);
+ 
 
 
  private DifferentialDrive drive;
@@ -66,15 +75,16 @@ private final WPI_TalonFX; Aux3= new WPI_TalonFX;(14); Need to do can ID first
     m_field.setRobotPose(m_pose);
 
    // m_field.getObject("traj").setTrajectory(m_trajectory);
-
+   System.out.println(pidgey.isConnected());
    // Reset all SPX settings
    leftMaster.configFactoryDefault();
    rightMaster.configFactoryDefault();
    leftFollower.configFactoryDefault();
    rightFollower.configFactoryDefault();
    rightAux.configFactoryDefault();
-   leftAux.configFactoryDefault();
+   //leftAux.configFactoryDefault();
 
+   pidgey.setYaw(0.0);
 
    // Followers
    leftFollower.follow(leftMaster);
@@ -114,10 +124,12 @@ private final WPI_TalonFX; Aux3= new WPI_TalonFX;(14); Need to do can ID first
  static double RAuxSpeed;
  static double turningSpeed = 1;
  static double driveSpeed = 0;
-
+ 
   @Override
   public void teleopPeriodic() {
-   
+
+    
+    
     if (driver.getLeftBumperButton()){
       //LB();
       mainspeed = 0.5;
@@ -219,12 +231,16 @@ private final WPI_TalonFX; Aux3= new WPI_TalonFX;(14); Need to do can ID first
     System.out.println(driver.getPOV());
     System.out.println(
       "POV: " + driver.getPOV() + 
-      " | RAuxS: " + RAuxSpeed + 
-      " | LJoy: " + LeftYJoy + 
-      " | Mainspeed: " + mainspeed + 
-      " || RJoy: " + RightXJoy + 
-      " | TurnSpeed: " + turnSpeed + 
-      " | Drive Powah: " + driveSpeed);
+      " | RAuxS: " + Math.round(RAuxSpeed*1000)/1000 + 
+      " \n| LJoy: " + Math.round(LeftYJoy*1000)/1000 + 
+      " \n| Mainspeed: " + Math.round(mainspeed*1000)/1000 + 
+      " \n| RJoy: " + Math.round(RightXJoy*1000)/1000 + 
+      " \n| TurnSpeed: " + Math.round(turnSpeed*1000)/1000 + 
+      " \n| Drive Powah: " + Math.round(driveSpeed*1000)/1000 +
+      
+      " \n| Angle yaw : " + Math.round(pidgey.getYaw().getValueAsDouble()) +
+      " \n| Angle pitch : " + Math.round(pidgey.getPitch().getValueAsDouble()) +
+      " \n| Angle roll : " + Math.round(pidgey.getRoll().getValueAsDouble()));
 
       if (driver.getRightTriggerAxis() > 0.1 || driver.getLeftTriggerAxis() > 0.1) 
       {
@@ -234,13 +250,13 @@ private final WPI_TalonFX; Aux3= new WPI_TalonFX;(14); Need to do can ID first
       LAuxSpeed = driver.getRightTriggerAxis();
       // System.out.println("Aux speed: " + LAuxSpeed);
      }else if (driver.getLeftTriggerAxis() > 0.3){
-      LAuxSpeed = driver.getLeftTriggerAxis() * 0.8 * -1;
+      LAuxSpeed = driver.getLeftTriggerAxis() * 1.0 * -1;
 
      }
       
-     
+    
     } else{
-      LAuxSpeed = 0.2;
+      LAuxSpeed = 0.0;
      }
      System.out.println("Aux speed: " + LAuxSpeed);
      leftAux.set(LAuxSpeed);
