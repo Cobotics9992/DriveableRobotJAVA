@@ -2,6 +2,10 @@
 // Open Source Software released under the WPILib BSD licence.
 
 
+  //-------------------------------------
+  //         Importing Software and Code, defining CAN IDs
+  //-------------------------------------
+
 package frc.robot;
 
 
@@ -86,26 +90,30 @@ public class Robot extends TimedRobot {
  // ---------------------------------------------------------------------------
 
  //vars
+ //these are variables used in the teleop method
  static double mainspeed = 0.75;
  static double PickupSpeed;
  static double revertAngle = 0;
   @Override
   public void teleopPeriodic() {
    
+
+    //-------------------------------------
+    //         Speed and setting driving motors
+    //-------------------------------------
     if (driver.getLeftBumperButton()){
-      
+      //lower mainspeed for lowerspeed mode on push
       mainspeed = 0.5;
     }
     
     if (driver.getRightBumperButton()) {
-      
+      //speed back to normal mode on push
       mainspeed = 0.75;
-
     }
     
     // Split-arcade driving: left-stick Y for throttle, right-stick X for turn
     drive.arcadeDrive(
-        (-driver.getLeftY() * mainspeed),   // invert so forward is positive
+        (-driver.getLeftY() * mainspeed /* modifying raw joysticl input by mainspeed set above */),   // invert so forward is positive
         (-driver.getRightX() * mainspeed)); // invert so right is positive
         
     double LeftYJoy = driver.getLeftY();
@@ -113,54 +121,60 @@ public class Robot extends TimedRobot {
 
  
  
-    if (driver.getYButton()) {
+    if (driver.getYButton()) { //unused if y button is pressed
      
 
     }
     
-    if (driver.getAButton()) {
+    if (driver.getAButton()) { //unused if a button is pressed
       
              
     }
  
  
-    // Run console log of button pressed while x is held
+
     if (driver.getXButton()) {
       
      
-      }
+    }
     
-     if (driver.getBButton()) {
+    if (driver.getBButton()) {
     
-     }
+    }
  
-    
- 
- 
-    
-    if (driver.getRightTriggerAxis() > 0.1 || driver.getLeftTriggerAxis() > 0.1) 
-      {
-      //RT();
 
-        if (driver.getRightTriggerAxis() > 0.3) {
-          PickupSpeed = driver.getRightTriggerAxis();
+    //-------------------------------------
+    //         Dispenser System
+    //-------------------------------------
+
+    if (driver.getRightTriggerAxis() > 0.1 || driver.getLeftTriggerAxis() > 0.1) //if either trigger is pulled at least a bit
+      {
+
+        if (driver.getRightTriggerAxis() > 0.3) { //if right trigger pulled, then dispenser at that speed ("right one dispenses" -adlai)
+          PickupSpeed = driver.getRightTriggerAxis(); 
           // System.out.println("Aux speed: " + PickupSpeed);
-      }else if (driver.getLeftTriggerAxis() > 0.3){
+      }else if (driver.getLeftTriggerAxis() > 0.3){ //if left trigger pulled, then run collecter at that speed
         PickupSpeed = driver.getLeftTriggerAxis() * 1.0 * -1;
       }
       
     } else{
-      PickupSpeed = 0.0;
+      PickupSpeed = 0.0; //if no triggers, dont run it
      }
 
-     if (driver.getStartButtonPressed()==true){
+    pickupMotor.set(PickupSpeed);//sets pickup motor speed as set above
+
+
+    //-------------------------------------
+    //         Pidgey
+    //-------------------------------------
+     if (driver.getStartButtonPressed()==true){ //if start button is pressed, put pidgey yaw to 0, untested and not used at time of writing
       revertAngle = pidgey.getYaw().getValueAsDouble();
       pidgey.setYaw(0.0);
       System.out.println("### Yaw Reset! ###");
      }
 
 
-       pickupMotor.set(PickupSpeed);
+      
    System.out.println(
       "POV: " + driver.getPOV() + 
       " \n| AuxSpeed: " + PickupSpeed +
